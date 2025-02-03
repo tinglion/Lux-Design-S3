@@ -3,3 +3,6 @@ __pycache__
 episodes/
 .vscode/
 replays/
+# custom
+*.tar.gz
+*.log
