@@ -42,11 +42,8 @@ def get_safe_move(unit_pos, relic_pos):
 
     for i in range(100):
         random_direction = np.random.randint(0, 5)
-
-        if random_direction == 0:
-            # reduce probability of center
-            if old_distance <= 1 or np.random.randint(0, 2) == 0:
-                return [0, 0, 0]
+        if old_distance < TH_MAXD_DISTANCE:
+            return [random_direction, 0, 0]
 
         new_pos = unit_pos.copy()
         if random_direction == 1:
@@ -57,8 +54,9 @@ def get_safe_move(unit_pos, relic_pos):
             new_pos[1] += 1
         elif random_direction == 4:
             new_pos[0] -= 1
+        new_distance = calc_distance_maxd(new_pos, relic_pos)
 
-        if calc_distance_maxd(new_pos, relic_pos) <= TH_MAXD_DISTANCE:
+        if new_distance <= TH_MAXD_DISTANCE:
             return [random_direction, 0, 0]
     return [0, 0, 0]
 
@@ -132,7 +130,6 @@ class Agent:
                 self.relic_node_positions.append(observed_relic_node_positions[id])
 
         # TODO 充分探索，绕开障碍（保存历史障碍信息），全局分配移动方向，避免重叠
-        # TODO save energy
         # TODO attack
 
         # unit ids range from 0 to max_units - 1
@@ -156,10 +153,14 @@ class Agent:
 
                 # if close to the relic node we want to hover around it and hope to gain points
                 if manhattan_distance <= TH_MAXD_DISTANCE:
-                    actions[unit_id] = get_safe_move(
-                        unit_pos, nearest_relic_node_position
-                    )
+                    # save energy
+                    if np.random.randint(0, 2) == 0:
+                        actions[unit_id] = get_safe_move(
+                            unit_pos, nearest_relic_node_position
+                        )
                 else:
+                    # TODO detect blocked, and backward
+
                     # otherwise we want to move towards the relic node
                     actions[unit_id] = [
                         direction_to(unit_pos, nearest_relic_node_position),

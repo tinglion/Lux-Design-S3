@@ -18,6 +18,7 @@ def direction_to(src, target):
         # 25% use x
         use_x = abs(dx) == 0 or np.random.randint(0, 4) == 0
     elif abs(dx) == abs(dy):
+        # 50%
         use_x = np.random.randint(0, 2) == 0
 
     if use_x:
