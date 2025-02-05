@@ -83,6 +83,8 @@ class Agent:
 
         step is the current timestep number of the game starting from 0 going up to max_steps_in_match * match_count_per_episode - 1.
         """
+        logger.debug(abs)
+
         # shape (max_units, )
         unit_mask = np.array(obs["units_mask"][self.team_id])
         # shape (max_units, 2)

@@ -7,3 +7,5 @@ replays/
 *.tar.gz
 logs
 *.log
+temp
+*.npz
