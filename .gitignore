@@ -5,6 +5,7 @@ episodes/
 replays/
 # custom
 *.tar.gz
+*.zip
 logs
 *.log
 temp

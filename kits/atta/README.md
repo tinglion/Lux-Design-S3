@@ -5,6 +5,7 @@
 * atta: attack opposite
 * atta2: 30% detect
 * atta3: at least 1 detector with max energy when availables>8; avoid energy trap
+* atta4: less move
 
 ## maxd
 

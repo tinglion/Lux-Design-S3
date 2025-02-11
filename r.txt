@@ -1,2 +1,3 @@
 wandb
-pip install 'stable-baselines3[extra]'
+stable-baselines3 #'stable-baselines3[extra]'
+shimmy>=2.0

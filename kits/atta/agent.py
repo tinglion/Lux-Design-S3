@@ -39,8 +39,8 @@ def get_safe_move(unit_pos, relic_pos):
 
     for i in range(1):
         random_direction = np.random.randint(0, 5)
-        if old_distance < TH_MAXD_DISTANCE:
-            return random_direction
+        # if old_distance < TH_MAXD_DISTANCE:
+        #     return random_direction
 
         new_pos = unit_pos.copy()
         if random_direction == 1:
@@ -141,14 +141,11 @@ class Agent:
                 self.relic_node_positions.append(observed_relic_node_positions[id])
 
         # TODO 充分探索，绕开障碍（保存历史障碍信息），全局分配移动方向，避免重叠
-        # TODO 移动避开能量陷阱
         # TODO 预测得分点，减少损失移动
         # TODO 预测地图移动
-        # TODO 能量低的守着得分，能量高的去探索
 
-        attack_cost = self.env_cfg.get("unit_sap_cost", 10) * self.env_cfg.get(
-            "unit_sap_dropoff_factor", 0.5
-        )
+        attack_cost = self.env_cfg.get("unit_sap_cost", 30)
+        # * self.env_cfg.get("unit_sap_dropoff_factor", 0.5)
         attacked_enemy_ids = set()
 
         # at least 1 detector with max energy when availables>8
@@ -184,7 +181,7 @@ class Agent:
 
                 if (
                     dist_unit_enemy <= self.env_cfg.get("unit_sap_range", 4)
-                    and unit_energys[unit_id] > attack_cost
+                    and unit_energys[unit_id] > attack_cost + 20
                     # and len(friends) < 1
                 ):
                     actions[unit_id] = [
@@ -223,7 +220,7 @@ class Agent:
                         to_move = get_safe_move(unit_pos, nearest_relic_node_position)
                         # 得分区域尽量分散
                         target_pos = tuple(calc_target_position(unit_pos, to_move))
-                        if target_pos not in scoring_positions:
+                        if unit_energy > 0 and target_pos not in scoring_positions:
                             actions[unit_id] = [to_move, 0, 0]
                             scoring_positions.append(target_pos)
                 else:
@@ -244,26 +241,22 @@ class Agent:
                     step % TH_RANDOM_DIRECTION == 0
                     or unit_id not in self.unit_explore_locations
                 ):
+                    min_distance = (
+                        self.env_cfg["map_width"] + self.env_cfg["map_height"]
+                    ) * 0.1
                     while True:
                         rand_loc = (
                             np.random.randint(0, self.env_cfg["map_width"]),
                             np.random.randint(0, self.env_cfg["map_height"]),
                         )
-                        if (
-                            calc_distance_manhattan(unit_pos, rand_loc)
-                            > (self.env_cfg["map_width"] + self.env_cfg["map_height"])
-                            / 4
-                        ):
+                        if calc_distance_maxd(unit_pos, rand_loc) > min_distance:
+                            self.unit_explore_locations[unit_id] = rand_loc
                             break
-                    self.unit_explore_locations[unit_id] = rand_loc
-                actions[unit_id] = [
-                    direction_to_untrap(
-                        unit_pos,
-                        self.unit_explore_locations[unit_id],
-                        energy_map=energy_map,
-                        tile_map=tile_map,
-                    ),
-                    0,
-                    0,
-                ]
+                to_move = direction_to_untrap(
+                    unit_pos,
+                    self.unit_explore_locations[unit_id],
+                    energy_map=energy_map,
+                    tile_map=tile_map,
+                )
+                actions[unit_id] = [to_move, 0, 0]
         return actions

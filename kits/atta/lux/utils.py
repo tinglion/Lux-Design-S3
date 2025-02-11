@@ -58,8 +58,8 @@ def direction_to_untrap(src, target, energy_map, tile_map):
         if (
             move[0] < 0
             or move[1] < 0
-            or move[0] >= energy_map.shape[0] - 1
-            or move[1] >= energy_map.shape[1] - 1
+            or move[0] >= energy_map.shape[0]
+            or move[1] >= energy_map.shape[1]
         ):
             continue
         if tile_map[move[0], move[1]] == 2:
@@ -73,8 +73,12 @@ def direction_to_untrap(src, target, energy_map, tile_map):
         )
 
     sorted_list = sorted(possible_step.items(), key=lambda item: item[1], reverse=True)
-    logger.info(sorted_list)
-    return sorted_list[0][0] if len(sorted_list) > 0 else 0
+    if len(sorted_list) < 1:
+        return 0
+
+    candidates = [r for r in sorted_list if r[1] == sorted_list[0][1]]
+    logger.info(f"{src}, {target}, {candidates} ")
+    return candidates[np.random.randint(len(candidates))][0]
 
 
 def filter_realm_points(center=[1, 1], points=[], rect_r=1):
